@@ -1,8 +1,9 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
+import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
@@ -34,16 +35,20 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Home page - always accessible */}
-        <Route path="/" element={<Home session={session} />} />
-        {/* Login page - only accessible when logged out */}
-        <Route
-          path="/login"
-          element={!session ? <Login /> : <Navigate to="/" replace />}
-        />
-        {/* OAuth callback handler */}
+        {/* Public auth routes (no layout) */}
+        <Route path="/login" element={!session ? <Login /> : <Navigate to="/" replace />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        {/* Future protected routes go here */}
+
+        {/* All other routes wrapped in Layout */}
+        <Route element={<Layout session={session} />}>
+          <Route path="/" element={<Home />} />
+          {/* Add more routes here later, e.g.:
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/account" element={<Account />} />
+          */}
+        </Route>
       </Routes>
     </BrowserRouter>
   );
