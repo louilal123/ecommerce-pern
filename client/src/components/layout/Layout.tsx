@@ -1,6 +1,6 @@
 // src/components/layout/Layout.tsx
 import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import {
