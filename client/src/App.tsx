@@ -38,7 +38,7 @@ function App() {
 
   return (
     <CartProvider>
-      <Toaster position="top-center" richColors />   
+      <Toaster position="top-right" richColors />   
       <BrowserRouter>
         <Routes>
           {/* Public auth routes (no layout) */}

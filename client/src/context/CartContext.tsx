@@ -16,6 +16,7 @@ interface CartItem {
     attributes: Record<string, any>;
     price: number;
   };
+  image_url?: string; // 👈 add image URL
 }
 
 interface CartContextType {
@@ -47,6 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // Fetch cart items with product, variant, and **primary image**
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
@@ -59,15 +61,71 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `)
       .eq('user_id', user.id);
 
-    if (error) console.error(error);
-    else setItems(data as any);
+    if (error) {
+      console.error(error);
+      setLoading(false);
+      return;
+    }
+
+    // For each cart item, fetch its primary product image (or variant-specific image)
+    const enrichedItems = await Promise.all(
+      (data || []).map(async (item: any) => {
+        let imageUrl: string | undefined;
+
+        // 1. Try variant-specific image first
+        if (item.variant_id) {
+          const { data: variantImg } = await supabase
+            .from('product_images')
+            .select('image_url')
+            .eq('variant_id', item.variant_id)
+            .eq('is_primary', true)
+            .maybeSingle();
+
+          if (variantImg) {
+            imageUrl = variantImg.image_url;
+          }
+        }
+
+        // 2. If no variant image, get product-level primary image
+        if (!imageUrl) {
+          const { data: productImg } = await supabase
+            .from('product_images')
+            .select('image_url')
+            .eq('product_id', item.product_id)
+            .eq('is_primary', true)
+            .maybeSingle();
+
+          if (productImg) {
+            imageUrl = productImg.image_url;
+          }
+        }
+
+        // 3. Fallback: any image (not primary) for the product
+        if (!imageUrl) {
+          const { data: anyImg } = await supabase
+            .from('product_images')
+            .select('image_url')
+            .eq('product_id', item.product_id)
+            .limit(1)
+            .maybeSingle();
+
+          if (anyImg) imageUrl = anyImg.image_url;
+        }
+
+        return {
+          ...item,
+          image_url: imageUrl,
+        };
+      })
+    );
+
+    setItems(enrichedItems as any);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchCart();
 
-    // Optional: subscribe to realtime changes for this user
     const channel = supabase
       .channel('cart-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cart_items' }, () => {
@@ -82,7 +140,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('You must be logged in');
 
-    // Upsert: if exists, add quantity; else insert
     const existing = items.find(i => i.product_id === productId && i.variant_id === variantId);
     if (existing) {
       await supabase
@@ -94,7 +151,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('cart_items')
         .insert({ user_id: user.id, product_id: productId, variant_id: variantId, quantity });
     }
-    await fetchCart(); // refresh
+    await fetchCart();
   };
 
   const removeFromCart = async (itemId: string) => {
@@ -107,7 +164,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.from('cart_items').update({ quantity }).eq('id', itemId);
     await fetchCart();
   };
-
 
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
 

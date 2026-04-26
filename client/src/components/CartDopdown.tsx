@@ -4,12 +4,20 @@ import { Link } from 'react-router-dom';
 import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useCart } from '../context/CartContext';
 
+// Format Philippine Peso
+const formatPHP = (amount: number) => {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(amount);
+};
+
 export default function CartDropdown() {
   const { items, count, updateQuantity, removeFromCart, loading } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -20,7 +28,6 @@ export default function CartDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Calculate subtotal for dropdown summary
   const subtotal = items.reduce((sum, item) => {
     const price = item.variant?.price ?? item.product.default_price;
     return sum + price * item.quantity;
@@ -36,7 +43,7 @@ export default function CartDropdown() {
       >
         <ShoppingCartIcon className="h-6 w-6 text-gray-700 cursor-pointer" />
         {count > 0 && (
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold  rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {count}
           </span>
         )}
@@ -77,9 +84,19 @@ export default function CartDropdown() {
 
                   return (
                     <li key={item.id} className="p-3 flex gap-3">
-                      {/* Product image placeholder (you can add real images later) */}
-                      <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center text-gray-400">
-                        🛍️
+                      {/* Product Image */}
+                      <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 overflow-hidden">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">
+                            🛍️
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <Link
@@ -110,7 +127,7 @@ export default function CartDropdown() {
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold text-teal-600">
-                              ${(price * item.quantity).toFixed(2)}
+                              {formatPHP(price * item.quantity)}
                             </p>
                             <button
                               onClick={() => removeFromCart(item.id)}
@@ -132,7 +149,7 @@ export default function CartDropdown() {
             <div className="p-3 border-t border-gray-200 bg-gray-50">
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Subtotal:</span>
-                <span className="font-bold text-teal-600">${subtotal.toFixed(2)}</span>
+                <span className="font-bold text-teal-600">{formatPHP(subtotal)}</span>
               </div>
               <Link
                 to="/cart"
