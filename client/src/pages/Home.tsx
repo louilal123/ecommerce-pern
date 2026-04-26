@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../context/CartContext';
+import { toast } from 'sonner';
 
 interface Category {
   id: string;
@@ -27,15 +28,15 @@ export default function Home() {
 
   const { addToCart } = useCart();
 
-  // ✅ Correct handler – passes product.id, no variant (null), quantity = 1
-  const handleAddToCart = async (product: Product) => {
-    try {
-      await addToCart(product.id, null, 1);
-      alert(`Added ${product.name} to cart!`);
-    } catch (error) {
-      alert('Please log in to add items to cart.');
-    }
-  };
+ 
+const handleAddToCart = async (product: Product) => {
+  try {
+    await addToCart(product.id, null, 1);
+    toast.success(`Added ${product.name} to cart!`);   
+  } catch (error) {
+    toast.error('Please log in to add items to cart.'); 
+  }
+};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,20 +142,27 @@ export default function Home() {
                     )}
                   </div>
                   <h4 className="font-medium text-gray-800 text-sm line-clamp-2">{product.name}</h4>
-                  <div className="mt-1">
+                 <div className="mt-1">
                     <span className="text-teal-600 font-bold text-sm">
-                      ${product.default_price?.toFixed(2)}
+                      {new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP",
+                      }).format(product.default_price)}
                     </span>
+
                     {product.default_compare_at_price && (
                       <span className="text-gray-400 line-through text-xs ml-2">
-                        ${product.default_compare_at_price.toFixed(2)}
+                        {new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP",
+                        }).format(product.default_compare_at_price)}
                       </span>
                     )}
                   </div>
                 </Link>
                 <button
-                  onClick={() => handleAddToCart(product)}  // ✅ fixed: use handler
-                  className="mt-3 w-full bg-teal-600 text-white text-xs font-medium py-2 rounded-md hover:bg-teal-700 transition"
+                  onClick={() => handleAddToCart(product)}  
+                  className="mt-3 w-full bg-teal-600 text-white text-xs cursor-pointer font-medium py-2 rounded-md hover:bg-teal-700 transition"
                 >
                   Add to Cart
                 </button>

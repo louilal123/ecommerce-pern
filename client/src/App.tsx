@@ -9,7 +9,7 @@ import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import LoadingSpinner from './components/LoadingSpinner';
 import { CartProvider } from './context/CartContext';  // 👈 import
-
+import { Toaster } from 'sonner';  
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,7 +34,8 @@ function App() {
   }
 
   return (
-    <CartProvider>  {/* 👈 wrap the entire router */}
+    <CartProvider>
+      <Toaster position="top-center" richColors />   
       <BrowserRouter>
         <Routes>
           {/* Public auth routes (no layout) */}

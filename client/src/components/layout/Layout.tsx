@@ -17,13 +17,15 @@ import {
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
+import CartDropdown from '../CartDopdown';
+
 interface LayoutProps {
   session: Session | null;
 }
 
 export default function Layout({ session }: LayoutProps) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
- const { count: cartItemCount } = useCart();
+  const { count: cartItemCount } = useCart();  // still used for the drawer badge
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';
@@ -57,7 +59,7 @@ export default function Layout({ session }: LayoutProps) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Sticky Header Container */}
       <header className="sticky top-0 z-40">
-        {/* Top Utility Bar (Shopee‑style) - Desktop & Mobile unified light bg */}
+        {/* Top Utility Bar  */}
         <div className="bg-gray-50  text-sm">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
             {/* Desktop links (hidden on mobile) */}
@@ -151,16 +153,8 @@ export default function Layout({ session }: LayoutProps) {
                 </div>
               </div>
 
-              {/* Right Section */}
               <div className="flex items-center gap-4 shrink-0">
-                <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition">
-                  <ShoppingCartIcon className="h-6 w-6 text-gray-700" />
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </Link>
+                <CartDropdown />  
 
                 {session ? (
                   <div className="relative group">
@@ -210,14 +204,7 @@ export default function Layout({ session }: LayoutProps) {
               </Link>
 
               <div className="flex items-center gap-2">
-                <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full">
-                  <ShoppingCartIcon className="h-6 w-6 text-gray-700" />
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </Link>
+                <CartDropdown />   {/* 👈 also use dropdown here */}
 
                 {session ? (
                   <Link to="/account" className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase">
