@@ -11,7 +11,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { CartProvider } from './context/CartContext';  // 
 import ProductDetail from './pages/ProductDetail';
 import { Toaster } from 'sonner';  
-import Cart from './pages/CartList';
+import Checkout from './pages/Checkout'; 
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -49,8 +49,7 @@ function App() {
           <Route element={<Layout session={session} />}>
             <Route path="/" element={<Home />} />
              <Route path="product/:slug" element={<ProductDetail />} /> 
-             <Route path="/cart" element={<Cart />} />
-             
+             <Route path="/checkout" element={<Checkout />} />
             {/* more routes */}
           </Route>
         </Routes>

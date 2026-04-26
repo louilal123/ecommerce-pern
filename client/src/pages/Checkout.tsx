@@ -1,7 +1,7 @@
 // src/pages/CartList.tsx
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-
+import { toast } from 'sonner';
 // Helper: format Philippine Peso
 const formatPHP = (amount: number) => {
   return new Intl.NumberFormat('en-PH', {
@@ -11,13 +11,18 @@ const formatPHP = (amount: number) => {
   }).format(amount);
 };
 
-export default function Cart() {
+const proceedtoCheckout = () => {
+  toast.error('Checkout button clicked.');
+};
+
+export default function Checkout() {
   const { items, updateQuantity, removeFromCart, loading } = useCart();
 
   const subtotal = items.reduce((sum, item) => {
     const price = item.variant?.price || item.product.default_price;
     return sum + price * item.quantity;
   }, 0);
+  
 
   if (loading) return <div className="p-8 text-center">Loading cart...</div>;
 
@@ -81,7 +86,7 @@ export default function Cart() {
       </div>
       <div className="mt-6 border-t pt-4 text-right">
         <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
-        <button className="mt-4 bg-teal-600 text-white px-6 py-2 rounded-md font-semibold">
+        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-teal-600 text-white px-6 py-2 rounded-md font-semibold">
           Proceed to Checkout
         </button>
       </div>

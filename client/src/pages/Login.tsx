@@ -55,7 +55,7 @@ export default function Login() {
       {/* Header - simple e‑commerce style */}
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-teal-600">lecommerce</h1>
+          <h1 className="text-2xl font-bold text-teal-600">Lecommerce</h1>
         </div>
       </header>
 
