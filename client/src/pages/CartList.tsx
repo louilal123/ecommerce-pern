@@ -1,6 +1,15 @@
-// src/pages/Cart.tsx
+// src/pages/CartList.tsx
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
+
+// Helper: format Philippine Peso
+const formatPHP = (amount: number) => {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2,
+  }).format(amount);
+};
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, loading } = useCart();
@@ -40,7 +49,7 @@ export default function Cart() {
                   {product.name}
                 </Link>
                 {variantDesc && <p className="text-sm text-gray-500">{variantDesc}</p>}
-                <p className="text-teal-600 font-bold">${price.toFixed(2)}</p>
+                <p className="text-teal-600 font-bold">{formatPHP(price)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -58,7 +67,7 @@ export default function Cart() {
                 </button>
               </div>
               <div className="text-right">
-                <p className="font-semibold">${(price * item.quantity).toFixed(2)}</p>
+                <p className="font-semibold">{formatPHP(price * item.quantity)}</p>
                 <button
                   onClick={() => removeFromCart(item.id)}
                   className="text-red-500 text-sm hover:underline"
@@ -71,7 +80,7 @@ export default function Cart() {
         })}
       </div>
       <div className="mt-6 border-t pt-4 text-right">
-        <p className="text-xl font-bold">Subtotal: ${subtotal.toFixed(2)}</p>
+        <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
         <button className="mt-4 bg-teal-600 text-white px-6 py-2 rounded-md font-semibold">
           Proceed to Checkout
         </button>

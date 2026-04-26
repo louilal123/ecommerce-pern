@@ -25,18 +25,27 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
+  const [addedProductId, setAddedProductId] = useState<string | null>(null);
 
   const { addToCart } = useCart();
 
- 
-const handleAddToCart = async (product: Product) => {
-  try {
-    await addToCart(product.id, null, 1);
-    toast.success(`Added ${product.name} to cart!`);   
-  } catch (error) {
-    toast.error('Please log in to add items to cart.'); 
-  }
-};
+  const handleAddToCart = async (product: Product) => {
+    if (addingProductId === product.id) return; // prevent double-click
+
+    setAddingProductId(product.id);
+    try {
+      await addToCart(product.id, null, 1);
+      toast.success(`Added ${product.name} to cart!`);
+      // Show "Added!" on button for 1.5 seconds
+      setAddedProductId(product.id);
+      setTimeout(() => setAddedProductId(null), 1500);
+    } catch (error) {
+      toast.error('Please log in to add items to cart.');
+    } finally {
+      setAddingProductId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +83,7 @@ const handleAddToCart = async (product: Product) => {
       <section className="bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-sm overflow-hidden mb-6 md:mb-8">
         <div className="px-4 py-8 md:py-12">
           <h2 className="text-2xl md:text-4xl font-bold mb-2">Shop the Latest Trends</h2>
-          <p className="text-sm md:text-base mb-4">Free shipping on orders over $50</p>
+          <p className="text-sm md:text-base mb-4">Free shipping on orders over ₱2,500</p>
           <Link to="/products" className="inline-block bg-white text-teal-600 px-5 py-2 rounded-full text-sm font-semibold">
             Shop Now
           </Link>
@@ -110,7 +119,7 @@ const handleAddToCart = async (product: Product) => {
         )}
       </section>
 
-      {/* All Products Grid - 8 columns on extra large screens */}
+      {/* All Products Grid */}
       <section>
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg md:text-xl font-semibold text-gray-800">All Products</h3>
@@ -142,7 +151,7 @@ const handleAddToCart = async (product: Product) => {
                     )}
                   </div>
                   <h4 className="font-medium text-gray-800 text-sm line-clamp-2">{product.name}</h4>
-                 <div className="mt-1">
+                  <div className="mt-1">
                     <span className="text-teal-600 font-bold text-sm">
                       {new Intl.NumberFormat("en-PH", {
                         style: "currency",
@@ -160,11 +169,23 @@ const handleAddToCart = async (product: Product) => {
                     )}
                   </div>
                 </Link>
+
                 <button
-                  onClick={() => handleAddToCart(product)}  
-                  className="mt-3 w-full bg-teal-600 text-white text-xs cursor-pointer font-medium py-2 rounded-md hover:bg-teal-700 transition"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={addingProductId === product.id}
+                  className={`mt-3 w-full text-xs font-medium py-2 rounded-md transition
+                    ${addingProductId === product.id
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : addedProductId === product.id
+                        ? 'bg-green-600 text-white'
+                        : 'bg-teal-600 text-white hover:bg-teal-700'
+                    }`}
                 >
-                  Add to Cart
+                  {addingProductId === product.id
+                    ? 'Adding...'
+                    : addedProductId === product.id
+                      ? '✓ Added!'
+                      : 'Add to Cart'}
                 </button>
               </div>
             ))}

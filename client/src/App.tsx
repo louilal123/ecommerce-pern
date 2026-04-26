@@ -8,8 +8,11 @@ import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import LoadingSpinner from './components/LoadingSpinner';
-import { CartProvider } from './context/CartContext';  // 👈 import
+import { CartProvider } from './context/CartContext';  // 
+import ProductDetail from './pages/ProductDetail';
 import { Toaster } from 'sonner';  
+import Cart from './pages/CartList';
+
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,6 +48,9 @@ function App() {
           {/* All other routes wrapped in Layout */}
           <Route element={<Layout session={session} />}>
             <Route path="/" element={<Home />} />
+             <Route path="product/:slug" element={<ProductDetail />} /> 
+             <Route path="/cart" element={<Cart />} />
+             
             {/* more routes */}
           </Route>
         </Routes>
