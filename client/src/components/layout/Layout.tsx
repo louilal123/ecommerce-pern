@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import type { Session } from '@supabase/supabase-js';
+import { useAuth } from '../../context/AuthContext';  
 import {
   HomeIcon,
   Squares2X2Icon,
@@ -17,16 +17,13 @@ import {
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
-import CartDropdown from '../CartDopdown';
+import CartDropdown from '../CartDopdown';  
 
-interface LayoutProps {
-  session: Session | null;
-}
-
-export default function Layout({ session }: LayoutProps) {
+export default function Layout() { 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const { count: cartItemCount } = useCart();  // still used for the drawer badge
+  const { count: cartItemCount } = useCart();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const { session, signOut } = useAuth();  // 👈 get session + signOut from context
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';
 
@@ -40,10 +37,6 @@ export default function Layout({ session }: LayoutProps) {
     };
     fetchCategories();
   }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   const closeDrawer = () => setMobileDrawerOpen(false);
 
@@ -59,8 +52,8 @@ export default function Layout({ session }: LayoutProps) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Sticky Header Container */}
       <header className="sticky top-0 z-40">
-        {/* Top Utility Bar  */}
-        <div className="bg-gray-50  text-sm">
+        {/* Top Utility Bar */}
+        <div className="bg-gray-50 text-sm">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
             {/* Desktop links (hidden on mobile) */}
             <div className="hidden md:flex items-center gap-6">
@@ -108,7 +101,7 @@ export default function Layout({ session }: LayoutProps) {
         </div>
 
         {/* Main Header */}
-        <div className="bg-white ">
+        <div className="bg-white">
           {/* Desktop / Tablet Header */}
           <div className="hidden md:block">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-6">
@@ -154,7 +147,7 @@ export default function Layout({ session }: LayoutProps) {
               </div>
 
               <div className="flex items-center gap-4 shrink-0">
-                <CartDropdown />  
+                <CartDropdown />
 
                 {session ? (
                   <div className="relative group">
@@ -167,7 +160,7 @@ export default function Layout({ session }: LayoutProps) {
                         <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
                       </div>
                       <button
-                        onClick={handleLogout}
+                        onClick={signOut}   // 👈 use context signOut
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
                       >
                         Sign Out
@@ -204,7 +197,7 @@ export default function Layout({ session }: LayoutProps) {
               </Link>
 
               <div className="flex items-center gap-2">
-                <CartDropdown />   {/* 👈 also use dropdown here */}
+                <CartDropdown />
 
                 {session ? (
                   <Link to="/account" className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase">
@@ -244,7 +237,7 @@ export default function Layout({ session }: LayoutProps) {
         </div>
       </header>
 
-      {/* Mobile Slide‑out Drawer (Amazon‑style) */}
+      {/* Mobile Slide‑out Drawer */}
       <div
         className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${
           mobileDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -291,7 +284,7 @@ export default function Layout({ session }: LayoutProps) {
             {session ? (
               <button
                 onClick={() => {
-                  handleLogout();
+                  signOut();
                   closeDrawer();
                 }}
                 className="w-full mt-2 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -345,7 +338,6 @@ export default function Layout({ session }: LayoutProps) {
           </div>
         </div>
       </footer>
-
     </div>
   );
 }

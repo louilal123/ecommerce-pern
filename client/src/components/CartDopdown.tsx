@@ -152,7 +152,7 @@ export default function CartDropdown() {
                 <span className="font-bold text-teal-600">{formatPHP(subtotal)}</span>
               </div>
               <Link
-                to="/cart"
+                to="/checkout"
                 onClick={() => setIsOpen(false)}
                 className="block w-full text-center bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition"
               >

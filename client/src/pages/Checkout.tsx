@@ -2,6 +2,7 @@
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import LoadingSpinner from '../components/LoadingSpinner';
 // Helper: format Philippine Peso
 const formatPHP = (amount: number) => {
   return new Intl.NumberFormat('en-PH', {
@@ -24,8 +25,9 @@ export default function Checkout() {
   }, 0);
   
 
-  if (loading) return <div className="p-8 text-center">Loading cart...</div>;
-
+  if (loading) {
+     return <LoadingSpinner />;
+   }
   if (items.length === 0) {
     return (
       <div className="text-center py-12">
@@ -86,7 +88,7 @@ export default function Checkout() {
       </div>
       <div className="mt-6 border-t pt-4 text-right">
         <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
-        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-teal-600 text-white px-6 py-2 rounded-md font-semibold">
+        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-red-600 text-white px-6 py-2 rounded-md font-semibold">
           Proceed to Checkout
         </button>
       </div>

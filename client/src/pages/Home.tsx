@@ -90,7 +90,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
       <section className="mb-10">
         <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-3">Shop by Category</h3>
         {loading ? (
@@ -103,6 +102,7 @@ export default function Home() {
               <Link
                 key={cat.id}
                 to={`/category/${cat.slug}`}
+                onClick={() => toast.info(`Browsing ${cat.name}`)}  // 👈 added toast
                 className="bg-white rounded-lg border border-gray-100 p-2 text-center hover:shadow-sm transition"
               >
                 <div className="h-16 w-16 mx-auto rounded-full bg-teal-50 flex items-center justify-center overflow-hidden">

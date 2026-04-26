@@ -338,7 +338,7 @@ export default function ProductDetail() {
                 onClick={handleAddToCart}
                 disabled={addingToCart}
                 className={`flex-1 bg-teal-600 text-white py-2 rounded-md font-semibold transition
-                  ${addingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-teal-700'}
+                  ${addingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-teal-300'}
                 `}
               >
                 {addingToCart ? 'Adding...' : 'Add to Cart'}
