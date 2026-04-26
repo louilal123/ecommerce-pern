@@ -173,7 +173,7 @@ export default function Home() {
                 <button
                   onClick={() => handleAddToCart(product)}
                   disabled={addingProductId === product.id}
-                  className={`mt-3 w-full text-xs font-medium py-2 rounded-md transition
+                  className={`mt-3 w-full text-xs font-medium py-2 rounded-md transition cursor-pointer
                     ${addingProductId === product.id
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : addedProductId === product.id
