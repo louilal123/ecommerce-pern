@@ -88,7 +88,7 @@ export default function Checkout() {
       </div>
       <div className="mt-6 border-t pt-4 text-right">
         <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
-        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-red-600 text-white px-6 py-2 rounded-md font-semibold">
+        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-red-600 text-white px-6 cursor-pointer py-2 rounded-md font-semibold">
           Proceed to Checkout
         </button>
       </div>
