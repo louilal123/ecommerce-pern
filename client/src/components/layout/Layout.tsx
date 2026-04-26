@@ -16,14 +16,14 @@ import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
-
+import { useCart } from '../../context/CartContext';
 interface LayoutProps {
   session: Session | null;
 }
 
 export default function Layout({ session }: LayoutProps) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [cartItemCount] = useState(3);
+ const { count: cartItemCount } = useCart();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';

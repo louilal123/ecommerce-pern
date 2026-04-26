@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Home from './pages/Home';
 import LoadingSpinner from './components/LoadingSpinner';
+import { CartProvider } from './context/CartContext';  // 👈 import
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -33,24 +34,21 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public auth routes (no layout) */}
-        <Route path="/login" element={!session ? <Login /> : <Navigate to="/" replace />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
+    <CartProvider>  {/* 👈 wrap the entire router */}
+      <BrowserRouter>
+        <Routes>
+          {/* Public auth routes (no layout) */}
+          <Route path="/login" element={!session ? <Login /> : <Navigate to="/" replace />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* All other routes wrapped in Layout */}
-        <Route element={<Layout session={session} />}>
-          <Route path="/" element={<Home />} />
-          {/* Add more routes here later, e.g.:
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/account" element={<Account />} />
-          */}
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* All other routes wrapped in Layout */}
+          <Route element={<Layout session={session} />}>
+            <Route path="/" element={<Home />} />
+            {/* more routes */}
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
   );
 }
 
