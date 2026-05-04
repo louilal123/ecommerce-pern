@@ -36,7 +36,7 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Toaster position="top-right" richColors />
+        <Toaster position="bottom-center" richColors />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>

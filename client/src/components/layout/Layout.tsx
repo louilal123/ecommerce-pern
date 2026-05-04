@@ -17,13 +17,13 @@ import {
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
-import CartDropdown from '../CartDopdown';  
+import CartDropdown from '../CartDropdown';  
 
 export default function Layout() { 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { count: cartItemCount } = useCart();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const { session, signOut } = useAuth();  // 👈 get session + signOut from context
+  const { session, signOut } = useAuth();  
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';
 
@@ -113,10 +113,7 @@ export default function Layout() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-2xl font-extrabold tracking-tight text-teal-600 group-hover:text-teal-700 transition leading-tight">
-                    lecommerce
-                  </span>
-                  <span className="text-[10px] font-medium text-gray-500 tracking-wider -mt-1">
-                    SHOP SMARTER
+                    LECOMMERCE
                   </span>
                 </div>
               </Link>

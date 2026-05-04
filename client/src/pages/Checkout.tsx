@@ -1,8 +1,9 @@
-// src/pages/CartList.tsx
+// src/pages/Checkout.tsx
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import LoadingSpinner from '../components/LoadingSpinner';
+
 // Helper: format Philippine Peso
 const formatPHP = (amount: number) => {
   return new Intl.NumberFormat('en-PH', {
@@ -23,11 +24,11 @@ export default function Checkout() {
     const price = item.variant?.price || item.product.default_price;
     return sum + price * item.quantity;
   }, 0);
-  
 
   if (loading) {
-     return <LoadingSpinner />;
-   }
+    return <LoadingSpinner />;
+  }
+
   if (items.length === 0) {
     return (
       <div className="text-center py-12">
@@ -47,17 +48,43 @@ export default function Checkout() {
           const product = item.product;
           const variant = item.variant;
           const price = variant?.price || product.default_price;
-          const variantDesc = variant?.attributes ? Object.values(variant.attributes).join(' / ') : null;
+          const variantDesc = variant?.attributes
+            ? Object.values(variant.attributes).join(' / ')
+            : null;
 
           return (
-            <div key={item.id} className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-lg shadow border">
+            <div
+              key={item.id}
+              className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-lg shadow border"
+            >
+              {/* Product Image */}
+              <div className="w-20 h-20 bg-gray-100 rounded-md flex-shrink-0 overflow-hidden">
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">
+                    🛍️
+                  </div>
+                )}
+              </div>
+
+              {/* Product Info */}
               <div className="flex-1">
-                <Link to={`/product/${product.slug}`} className="font-medium text-gray-800 hover:text-teal-600">
+                <Link
+                  to={`/product/${product.slug}`}
+                  className="font-medium text-gray-800 hover:text-teal-600"
+                >
                   {product.name}
                 </Link>
                 {variantDesc && <p className="text-sm text-gray-500">{variantDesc}</p>}
                 <p className="text-teal-600 font-bold">{formatPHP(price)}</p>
               </div>
+
+              {/* Quantity Controls */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -73,6 +100,8 @@ export default function Checkout() {
                   +
                 </button>
               </div>
+
+              {/* Item Total & Remove */}
               <div className="text-right">
                 <p className="font-semibold">{formatPHP(price * item.quantity)}</p>
                 <button
@@ -86,9 +115,14 @@ export default function Checkout() {
           );
         })}
       </div>
+
+      {/* Subtotal & Checkout Button */}
       <div className="mt-6 border-t pt-4 text-right">
         <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
-        <button  onClick={() => proceedtoCheckout()} className="mt-4 bg-red-600 text-white px-6 cursor-pointer py-2 rounded-md font-semibold">
+        <button
+          onClick={() => proceedtoCheckout()}
+          className="mt-4 bg-red-600 text-white px-6 cursor-pointer py-2 rounded-md font-semibold"
+        >
           Proceed to Checkout
         </button>
       </div>
