@@ -1,8 +1,10 @@
 // src/pages/Checkout.tsx
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { supabase } from '../lib/supabase';
+import { useState } from 'react';
 
 // Helper: format Philippine Peso
 const formatPHP = (amount: number) => {
@@ -13,21 +15,66 @@ const formatPHP = (amount: number) => {
   }).format(amount);
 };
 
-const proceedtoCheckout = () => {
-  toast.error('Checkout button clicked.');
-};
-
 export default function Checkout() {
   const { items, updateQuantity, removeFromCart, loading } = useCart();
+  const [checkingOut, setCheckingOut] = useState(false);
+  const navigate = useNavigate();
 
   const subtotal = items.reduce((sum, item) => {
     const price = item.variant?.price || item.product.default_price;
     return sum + price * item.quantity;
   }, 0);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const handleProceedToCheckout = async () => {
+    setCheckingOut(true);
+    try {
+      // 1. Get current user session and token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        toast.error('You must be logged in to checkout.');
+        navigate('/login');
+        return;
+      }
+
+      const token = session.access_token;
+
+      // 2. Prepare cart items payload
+      const cartPayload = items.map((item) => ({
+        product_name: item.product.name,
+        variant_description: item.variant?.attributes
+          ? Object.values(item.variant.attributes).join(' / ')
+          : '',
+        price: item.variant?.price || item.product.default_price,
+        quantity: item.quantity,
+      }));
+
+      // 3. Call backend
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ items: cartPayload }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Checkout failed');
+      }
+
+      // 4. Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message);
+    } finally {
+      setCheckingOut(false);
+    }
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   if (items.length === 0) {
     return (
@@ -88,14 +135,14 @@ export default function Checkout() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  className="w-8 h-8 border rounded-md"
+                  className="w-8 h-8 border rounded-md hover:bg-gray-100"
                 >
-                  -
+                  −
                 </button>
                 <span className="w-12 text-center">{item.quantity}</span>
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="w-8 h-8 border rounded-md"
+                  className="w-8 h-8 border rounded-md hover:bg-gray-100"
                 >
                   +
                 </button>
@@ -120,10 +167,11 @@ export default function Checkout() {
       <div className="mt-6 border-t pt-4 text-right">
         <p className="text-xl font-bold">Subtotal: {formatPHP(subtotal)}</p>
         <button
-          onClick={() => proceedtoCheckout()}
-          className="mt-4 bg-red-600 text-white px-6 cursor-pointer py-2 rounded-md font-semibold"
+          onClick={handleProceedToCheckout}
+          disabled={checkingOut}
+          className="mt-4 bg-red-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-700 disabled:opacity-50"
         >
-          Proceed to Checkout
+          {checkingOut ? 'Redirecting...' : 'Proceed to Checkout'}
         </button>
       </div>
     </div>
