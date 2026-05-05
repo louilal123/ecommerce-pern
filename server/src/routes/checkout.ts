@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { stripe } from '../lib/stripe';
-import { supabaseAdmin } from '../lib/supabase';
+import { supabaseAdmin, supabaseAuthClient } from '../lib/supabase';
 
 const router = Router();
 
-// Middleware to verify Supabase JWT from Authorization header
+// Middleware to verify the user's JWT (uses the auth-only client)
 const requireAuth = async (req: Request, res: Response, next: Function) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -12,27 +12,28 @@ const requireAuth = async (req: Request, res: Response, next: Function) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    const { data: { user }, error } = await supabaseAuthClient.auth.getUser(token);
 
     if (error || !user) {
         return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Attach user info to request for later use
+    // Attach user info to the request for later use
     (req as any).user = user;
     next();
 };
 
+// POST /api/create-checkout-session
 router.post('/', requireAuth, async (req: Request, res: Response) => {
     try {
-        const user = (req as any).user; // from middleware
+        const user = (req as any).user;
         const { items } = req.body;
 
         if (!items?.length) {
             return res.status(400).json({ error: 'Cart is empty' });
         }
 
-        // Build line items (plain objects – no explicit type annotation)
+        // Build line items (plain objects – no explicit type annotation needed)
         const lineItems = items.map((item: any) => ({
             price_data: {
                 currency: 'php',
@@ -50,7 +51,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             0
         );
 
-        // Create a pending order in Supabase
+        // Create a pending order in Supabase (uses admin client – bypasses RLS)
         const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
             .insert({
@@ -92,6 +93,8 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+// ❗ REMOVE THIS DEBUG ROUTE AFTER CONFIRMING THE FIX
 router.get('/check-key', async (_req, res) => {
     res.json({
         url: process.env.SUPABASE_URL,
