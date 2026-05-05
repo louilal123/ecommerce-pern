@@ -92,6 +92,12 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+router.get('/check-key', async (_req, res) => {
+    res.json({
+        url: process.env.SUPABASE_URL,
+        keyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 10),
+        keyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
+    });
+});
 
 export default router;
