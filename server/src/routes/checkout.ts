@@ -93,4 +93,26 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     }
 });
 
+// TEMPORARY: Debug auth
+router.get('/debug-auth', async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+    if (!token) {
+        return res.status(400).json({ error: 'No token provided. Use Authorization: Bearer <token>' });
+    }
+
+    const { data, error } = await supabaseAdmin.auth.getUser(token);
+
+    res.json({
+        hasToken: !!token,
+        tokenFirstChars: token.substring(0, 20) + '...',
+        valid: !error,
+        error: error ? error.message : null,
+        userEmail: data?.user?.email ?? null,
+        supabaseUrl: process.env.SUPABASE_URL,
+        serviceRoleKeyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 8) + '...',
+    });
+});
+
 export default router;
