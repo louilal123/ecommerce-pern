@@ -94,7 +94,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     }
 });
 
-// ❗ REMOVE THIS DEBUG ROUTE AFTER CONFIRMING THE FIX
+// REMOVE THIS DEBUG ROUTE AFTER CONFIRMING THE FIX
 router.get('/check-key', async (_req, res) => {
     res.json({
         url: process.env.SUPABASE_URL,
