@@ -1,1 +1,38 @@
+/* client\src\index.css */
+/* ============================================================
+   YOUR MAIN CSS FILE  (e.g. src/index.css or src/app.css)
+   ============================================================ */
+
 @import "tailwindcss";
+
+/*
+  Tailwind v4: enable class-based dark mode.
+  This tells Tailwind to activate dark: variants when the
+  `dark` class is present on <html> — which ThemeContext.tsx
+  adds/removes automatically.
+*/
+@variant dark (&:where(.dark, .dark *));
+
+/*
+  Optional but recommended: smooth theme transitions so the
+  background, text, and borders don't snap harshly when
+  switching modes. Applied globally so every element benefits.
+*/
+*,
+*::before,
+*::after {
+    transition-property: background-color, border-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+}
+
+/*
+  Prevent the transition from running on page load
+  (flash of wrong color). ThemeContext applies the class
+  synchronously during the useState initializer so this
+  is mostly handled, but this adds a safety net.
+  Remove if you find it interferes with your animations.
+*/
+html:not(.theme-ready) * {
+    transition: none !important;
+}
