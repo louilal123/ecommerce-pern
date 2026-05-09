@@ -56,10 +56,10 @@ const sampleNotifications = [
 
 function LecommerceLogo({ collapsed }: { collapsed?: boolean }) {
   return (
-    <div className="flex items-center gap-2.5 group cursor-default select-none">
+    <div className="flex items-center gap-3 group cursor-default select-none">
       <div className="relative flex-shrink-0">
         <ShoppingBagIcon className="h-7 w-7 text-teal-600" />
-        <span className="absolute -top-1 -right-1 bg-orange-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900" />
+        <span className="absolute -top-1 -right-1 bg-orange-500 w-2 h-2 rounded-full border-2 border-white dark:border-gray-900" />
       </div>
       {!collapsed && (
         <div className="flex flex-col leading-none">
@@ -94,7 +94,7 @@ function ThemeDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="cursor-pointer flex items-center gap-1.5 p-2 rounded-xl
+        className="cursor-pointer flex items-center gap-3 p-2 rounded-xl
           text-gray-400 dark:text-gray-500
           hover:bg-gray-100 dark:hover:bg-gray-800
           hover:text-gray-700 dark:hover:text-gray-300
@@ -368,8 +368,6 @@ export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-  const currentPage = navItems.find((n) => n.to === location.pathname)?.label ?? 'Dashboard';
-
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950 font-sans transition-colors duration-200">
       {/* ── Desktop Sidebar (no theme picker) ── */}
@@ -380,7 +378,7 @@ export default function AdminLayout() {
       >
         {/* Logo area */}
         <div
-          className={`flex items-center px-5 py-5 border-b border-gray-50 dark:border-gray-800 ${
+          className={`flex items-center px-4 py-4 border-b border-gray-50 dark:border-gray-800 ${
             collapsed ? 'justify-center' : 'justify-between'
           }`}
         >
@@ -388,7 +386,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 pt-5 space-y-1 overflow-y-auto">
+        <nav className="flex-1 pt-5  overflow-y-auto">
           {!collapsed && (
             <p className="text-[10px] font-bold text-gray-300 dark:text-gray-600 tracking-[0.2em] uppercase px-3 mb-3">
               Menu
@@ -402,7 +400,7 @@ export default function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 title={collapsed ? item.label : ''}
-                className={`cursor-pointer flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`cursor-pointer flex items-center gap-3 px-3 py-2.5  text-sm font-semibold transition-all duration-200 ${
                   active
                     ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-100'
@@ -488,7 +486,7 @@ export default function AdminLayout() {
 
       {/* ── Main Content ── */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-3 px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
+        <header className="flex items-center gap-3 px-2 py-2 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -547,7 +545,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 sm:p-8">
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8 scroll-smooth transform-gpu">
           <Outlet />
         </main>
       </div>

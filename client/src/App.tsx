@@ -13,7 +13,7 @@ import { Toaster } from 'sonner';
 import Checkout from './pages/Checkout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import OrderSuccess from './pages/OrderSuccess';
-
+import Products from './pages/admin/Products';
 function AppRoutes() {
   const { session, loading } = useAuth();
 
@@ -38,6 +38,7 @@ function AppRoutes() {
       {/* Admin routes – no auth guard for now */}
       <Route element={<AdminLayout />}>
         <Route path="/admin/dashboard" element={<Dashboard />} />
+         <Route path="/admin/products" element={<Products />} />
         {/* Optional: catch /admin and redirect to dashboard */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
