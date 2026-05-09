@@ -105,29 +105,23 @@ router.get('/check-key', async (_req, res) => {
 
 // TEMP: test admin insert directly
 router.get('/test-admin-insert', async (_req, res) => {
-    try {
-        const { data, error } = await supabaseAdmin
-            .from('orders')
-            .insert({
-                user_id: '00000000-0000-0000-0000-000000000000', // fake user
-                status: 'test',
-                total_amount: 0,
-            })
-            .select()
-            .single();
+    const { data, error } = await supabaseAdmin
+        .from('orders')
+        .insert({
+            user_id: '00000000-0000-0000-0000-000000000000',
+            status: 'pending',
+            total_amount: 0,
+        })
+        .select()
+        .single();
 
-        if (error) {
-            console.error('Test insert error:', error);
-            return res.status(500).json({ error: error.message, code: error.code });
-        }
-
-        // Clean up the test row immediately
-        await supabaseAdmin.from('orders').delete().eq('id', data.id);
-
-        return res.json({ success: true, message: 'Admin insert works' });
-    } catch (err: any) {
-        return res.status(500).json({ error: err.message });
+    if (error) {
+        console.error('Test insert error:', error);
+        return res.status(500).json({ error: error.message, code: error.code });
     }
+
+    await supabaseAdmin.from('orders').delete().eq('id', data.id);
+    res.json({ success: true, message: 'Admin insert works' });
 });
 
 export default router;
