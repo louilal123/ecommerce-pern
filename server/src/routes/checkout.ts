@@ -4,7 +4,7 @@ import { supabaseAdmin, supabaseAuthClient } from '../lib/supabase';
 
 const router = Router();
 
-// Middleware to verify the user's JWT (uses the auth-only client)
+// Middleware: verify user's JWT (uses auth-only client to avoid contaminating admin client)
 const requireAuth = async (req: Request, res: Response, next: Function) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -18,7 +18,6 @@ const requireAuth = async (req: Request, res: Response, next: Function) => {
         return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Attach user info to the request for later use
     (req as any).user = user;
     next();
 };
@@ -33,25 +32,28 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Cart is empty' });
         }
 
-        // Build line items (plain objects – no explicit type annotation needed)
-        const lineItems = items.map((item: any) => ({
-            price_data: {
-                currency: 'php',
-                product_data: {
-                    name: item.product_name,
-                    description: item.variant_description || '',
+        // Build line items – omit description if empty (Stripe rejects empty strings)
+        const lineItems = items.map((item: any) => {
+            const productData: any = { name: item.product_name };
+            if (item.variant_description && item.variant_description.trim() !== '') {
+                productData.description = item.variant_description.trim();
+            }
+            return {
+                price_data: {
+                    currency: 'php',
+                    product_data: productData,
+                    unit_amount: Math.round(item.price * 100),
                 },
-                unit_amount: Math.round(item.price * 100),
-            },
-            quantity: item.quantity,
-        }));
+                quantity: item.quantity,
+            };
+        });
 
         const totalInCents = lineItems.reduce(
             (sum: number, li: any) => sum + (li.price_data?.unit_amount ?? 0) * li.quantity,
             0
         );
 
-        // Create a pending order in Supabase (uses admin client – bypasses RLS)
+        // Create order (admin client bypasses RLS)
         const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
             .insert({
@@ -92,36 +94,6 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
         console.error('Checkout error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-});
-
-// REMOVE THIS DEBUG ROUTE AFTER CONFIRMING THE FIX
-router.get('/check-key', async (_req, res) => {
-    res.json({
-        url: process.env.SUPABASE_URL,
-        keyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 10),
-        keyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
-    });
-});
-
-// TEMP: test admin insert directly
-router.get('/test-admin-insert', async (_req, res) => {
-    const { data, error } = await supabaseAdmin
-        .from('orders')
-        .insert({
-            user_id: '00000000-0000-0000-0000-000000000000',
-            status: 'pending',
-            total_amount: 0,
-        })
-        .select()
-        .single();
-
-    if (error) {
-        console.error('Test insert error:', error);
-        return res.status(500).json({ error: error.message, code: error.code });
-    }
-
-    await supabaseAdmin.from('orders').delete().eq('id', data.id);
-    res.json({ success: true, message: 'Admin insert works' });
 });
 
 export default router;
