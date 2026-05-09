@@ -27,14 +27,13 @@ export default function Orders() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
 
-  // Map of order_id → items count
   const [itemsCountMap, setItemsCountMap] = useState<Record<string, number>>({});
+  const [userEmailMap, setUserEmailMap] = useState<Record<string, string>>({});
 
   const fetchOrders = async () => {
     setLoading(true);
     setError(null);
 
-    // Fetch orders newest first
     const { data, error } = await supabase
       .from('orders')
       .select('*')
@@ -49,8 +48,8 @@ export default function Orders() {
     const orders = data || [];
     setOrders(orders);
 
-    // Fetch item counts for each order
     if (orders.length > 0) {
+      // Fetch item counts per order
       const orderIds = orders.map((o) => o.id);
       const { data: itemsData } = await supabase
         .from('order_items')
@@ -62,6 +61,15 @@ export default function Orders() {
         countMap[item.order_id] = (countMap[item.order_id] || 0) + (item.quantity || 0);
       });
       setItemsCountMap(countMap);
+
+      // Fetch user emails for each distinct user_id
+      const userIds = [...new Set(orders.map((o) => o.user_id))];
+      const emailMap: Record<string, string> = {};
+      for (const uid of userIds) {
+        const { data: email } = await supabase.rpc('get_user_email', { user_id: uid });
+        emailMap[uid] = email || 'Unknown';
+      }
+      setUserEmailMap(emailMap);
     }
 
     setLoading(false);
@@ -78,10 +86,11 @@ export default function Orders() {
           (o) =>
             o.id.toLowerCase().includes(q) ||
             o.user_id.toLowerCase().includes(q) ||
+            (userEmailMap[o.user_id] ?? '').toLowerCase().includes(q) ||
             (o.stripe_session_id ?? '').toLowerCase().includes(q)
         )
       : orders;
-  }, [orders, search]);
+  }, [orders, search, userEmailMap]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
@@ -100,14 +109,10 @@ export default function Orders() {
 
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      paid:
-        'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400',
-      pending:
-        'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-      failed:
-        'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-      refunded:
-        'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
+      paid: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400',
+      pending: 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+      failed: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+      refunded: 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
     };
     return (
       <span className={`text-xs font-semibold px-2 py-0.5 rounded-sm ${styles[status] || styles.pending}`}>
@@ -118,7 +123,7 @@ export default function Orders() {
 
   return (
     <div className="space-y-6">
-      {/* Header + Search */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -135,7 +140,7 @@ export default function Orders() {
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by ID or user…"
+            placeholder="Search by ID, email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-72 pl-9 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none"
@@ -174,7 +179,7 @@ export default function Orders() {
                 No orders match your search “{search}”
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Try a different order ID or user ID.
+                Try a different order ID, email, or customer ID.
               </p>
             </div>
           ) : (
@@ -195,6 +200,7 @@ export default function Orders() {
                   <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                     {paged.map((order) => {
                       const itemsCount = itemsCountMap[order.id] ?? 0;
+                      const customerEmail = userEmailMap[order.user_id] || '—';
                       return (
                         <tr
                           key={order.id}
@@ -203,9 +209,8 @@ export default function Orders() {
                           <td className="py-4 px-4 font-mono text-xs text-gray-600 dark:text-gray-400">
                             {order.id.slice(0, 8)}…
                           </td>
-                          <td className="py-4 px-4 text-gray-700 dark:text-gray-300">
-                            {/* Display user ID for now; you can later fetch email */}
-                            {order.user_id.slice(0, 8)}…
+                          <td className="py-4 px-4 text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                            {customerEmail}
                           </td>
                           <td className="py-4 px-4 text-gray-400 dark:text-gray-500 whitespace-nowrap">
                             {new Date(order.created_at).toLocaleDateString('en-US', {
