@@ -24,6 +24,7 @@ const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: HomeIcon },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBagIcon },
   { to: '/admin/products', label: 'Products', icon: CubeIcon },
+  { to: '/admin/category', label: 'Category', icon: CubeIcon },
   { to: '/admin/reports', label: 'Reports', icon: ChartBarIcon },
 ];
 

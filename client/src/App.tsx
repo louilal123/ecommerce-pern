@@ -14,6 +14,8 @@ import Checkout from './pages/Checkout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import OrderSuccess from './pages/OrderSuccess';
 import Products from './pages/admin/Products';
+import Orders from './pages/admin/Orders';
+import Categories from './pages/admin/Categories';
 function AppRoutes() {
   const { session, loading } = useAuth();
 
@@ -39,6 +41,10 @@ function AppRoutes() {
       <Route element={<AdminLayout />}>
         <Route path="/admin/dashboard" element={<Dashboard />} />
          <Route path="/admin/products" element={<Products />} />
+         <Route path="/admin/orders" element={<Orders />} />
+         <Route path="/admin/category" element={<Categories />} />
+
+         
         {/* Optional: catch /admin and redirect to dashboard */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
