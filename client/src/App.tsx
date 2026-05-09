@@ -10,6 +10,7 @@ import ProductDetail from './pages/ProductDetail';
 import { Toaster } from 'sonner';
 import Checkout from './pages/Checkout';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import OrderSuccess from './pages/OrderSuccess';
 
 // Component that protects routes
 function AppRoutes() {
@@ -27,6 +28,7 @@ function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="product/:slug" element={<ProductDetail />} />
         <Route path="/checkout" element={<Checkout />} />
+         <Route path="/order/success" element={<OrderSuccess />} />
       </Route>
     </Routes>
   );
