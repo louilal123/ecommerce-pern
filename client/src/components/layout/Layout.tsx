@@ -1,8 +1,8 @@
 // src/components/layout/Layout.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';  
+import { useAuth } from '../../context/AuthContext';
 import {
   HomeIcon,
   Squares2X2Icon,
@@ -15,17 +15,31 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   GlobeAltIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
-import CartDropdown from '../CartDropdown';  
+import CartDropdown from '../CartDropdown';
 
-export default function Layout() { 
+export default function Layout() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { count: cartItemCount } = useCart();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const { session, signOut } = useAuth();  
+  const { session, signOut } = useAuth();
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -85,11 +99,11 @@ export default function Layout() {
               <Link to="/download" className="hover:text-teal-600 transition">Download</Link>
             </div>
             <div className="flex items-center gap-4">
-              <button className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition">
+              <button className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition cursor-pointer">
                 <BellIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Notifications</span>
               </button>
-              <Link to="/help" className="text-gray-700 hover:text-teal-600 transition">
+              <Link to="/help" className="text-gray-700 hover:text-teal-600 transition cursor-pointer">
                 Help
               </Link>
               <div className="flex items-center gap-1 text-gray-700">
@@ -106,7 +120,7 @@ export default function Layout() {
           <div className="hidden md:block">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-6">
               {/* Logo */}
-              <Link to="/" className="flex items-center gap-2 shrink-0 group">
+              <Link to="/" className="flex items-center gap-2 shrink-0 group cursor-pointer">
                 <div className="relative">
                   <ShoppingBagIcon className="h-7 w-7 text-teal-600 group-hover:text-teal-700 transition" />
                   <span className="absolute -top-1 -right-1 bg-orange-500 w-3 h-3 rounded-full border-2 border-white" />
@@ -137,7 +151,7 @@ export default function Layout() {
                     placeholder="Search for products, brands and more..."
                     className="flex-1 px-4 py-2 outline-none"
                   />
-                  <button className="bg-teal-600 hover:bg-teal-700 transition px-5 flex items-center justify-center">
+                  <button className="bg-teal-600 hover:bg-teal-700 transition px-5 flex items-center justify-center cursor-pointer">
                     <MagnifyingGlassIcon className="h-5 w-5 text-white" />
                   </button>
                 </div>
@@ -147,27 +161,42 @@ export default function Layout() {
                 <CartDropdown />
 
                 {session ? (
-                  <div className="relative group">
-                    <button className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase hover:bg-teal-700 transition">
+                  <div ref={profileRef} className="relative">
+                    <button
+                      onClick={() => setProfileOpen(!profileOpen)}
+                      className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase hover:bg-teal-700 transition cursor-pointer"
+                    >
                       {displayName.charAt(0)}
                     </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-800 truncate">{displayName}</p>
-                        <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
+
+                    {profileOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                        <Link
+                          to="/account"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                        >
+                          <UserIcon className="h-4 w-4 text-gray-400" />
+                          Profile
+                        </Link>
+
+                        <button
+                          onClick={() => {
+                            setProfileOpen(false);
+                            signOut();
+                          }}
+                          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer"
+                        >
+                          <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                          Log out
+                        </button>
                       </div>
-                      <button
-                        onClick={signOut}   
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
+                    )}
                   </div>
                 ) : (
                   <Link
                     to="/login"
-                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-teal-50 hover:text-teal-600 transition border border-gray-200"
+                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-teal-50 hover:text-teal-600 transition border border-gray-200 cursor-pointer"
                     title="Sign In"
                   >
                     <UserIcon className="h-5 w-5" />
@@ -182,13 +211,13 @@ export default function Layout() {
             <div className="px-4 py-3 flex items-center justify-between">
               <button
                 onClick={() => setMobileDrawerOpen(true)}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
                 aria-label="Open menu"
               >
                 <Bars3Icon className="h-6 w-6 text-gray-700" />
               </button>
 
-              <Link to="/" className="flex items-center gap-1.5">
+              <Link to="/" className="flex items-center gap-1.5 cursor-pointer">
                 <ShoppingBagIcon className="h-6 w-6 text-teal-600" />
                 <span className="text-xl font-extrabold text-teal-600">lecommerce</span>
               </Link>
@@ -197,13 +226,13 @@ export default function Layout() {
                 <CartDropdown />
 
                 {session ? (
-                  <Link to="/account" className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase">
+                  <Link to="/account" className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase cursor-pointer">
                     {displayName.charAt(0)}
                   </Link>
                 ) : (
                   <Link
                     to="/login"
-                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center"
+                    className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center cursor-pointer"
                   >
                     <UserIcon className="h-5 w-5" />
                   </Link>
@@ -214,7 +243,7 @@ export default function Layout() {
             {/* Mobile Search Bar with Dropdown */}
             <div className="px-4 pb-3">
               <div className="flex rounded-sm border border-gray-300 focus-within:ring-2 focus-within:ring-teal-500 overflow-hidden">
-                <select className="bg-gray-50 border-r border-gray-300 px-2 py-2 text-xs text-gray-700 outline-none max-w-[100px]">
+                <select className="bg-gray-50 border-r border-gray-300 px-2 py-2 text-xs text-gray-700 outline-none max-w-[100px] cursor-pointer">
                   <option>All</option>
                   {categories.slice(0, 5).map((cat) => (
                     <option key={cat.id}>{cat.name}</option>
@@ -225,7 +254,7 @@ export default function Layout() {
                   placeholder="Search..."
                   className="flex-1 px-3 py-2 text-sm outline-none"
                 />
-                <button className="bg-teal-600 px-4 flex items-center justify-center">
+                <button className="bg-teal-600 px-4 flex items-center justify-center cursor-pointer">
                   <MagnifyingGlassIcon className="h-4 w-4 text-white" />
                 </button>
               </div>
@@ -253,7 +282,7 @@ export default function Layout() {
             </div>
             <button
               onClick={closeDrawer}
-              className="p-1 hover:bg-teal-700 rounded-full"
+              className="p-1 hover:bg-teal-700 rounded-full cursor-pointer"
               aria-label="Close menu"
             >
               <XMarkIcon className="h-6 w-6" />
@@ -265,7 +294,7 @@ export default function Layout() {
                 key={item.name}
                 to={item.href}
                 onClick={closeDrawer}
-                className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 transition"
+                className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <item.icon className="h-5 w-5 text-gray-600" />
@@ -284,7 +313,7 @@ export default function Layout() {
                   signOut();
                   closeDrawer();
                 }}
-                className="w-full mt-2 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition"
+                className="w-full mt-2 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
               >
                 Sign Out
               </button>
@@ -292,7 +321,7 @@ export default function Layout() {
               <Link
                 to="/login"
                 onClick={closeDrawer}
-                className="block mt-2 px-4 py-3 text-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
+                className="block mt-2 px-4 py-3 text-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition cursor-pointer"
               >
                 Sign In
               </Link>
@@ -319,9 +348,9 @@ export default function Layout() {
             <div>
               <h4 className="font-semibold text-gray-800 mb-3">Quick Links</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><Link to="/help" className="hover:text-teal-600">Help Center</Link></li>
-                <li><Link to="/shipping" className="hover:text-teal-600">Shipping Info</Link></li>
-                <li><Link to="/returns" className="hover:text-teal-600">Returns</Link></li>
+                <li><Link to="/help" className="hover:text-teal-600 cursor-pointer">Help Center</Link></li>
+                <li><Link to="/shipping" className="hover:text-teal-600 cursor-pointer">Shipping Info</Link></li>
+                <li><Link to="/returns" className="hover:text-teal-600 cursor-pointer">Returns</Link></li>
               </ul>
             </div>
             <div>
