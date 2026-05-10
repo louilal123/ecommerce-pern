@@ -7,18 +7,34 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/');
-      } else {
+    const handleCallback = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
         navigate('/login');
+        return;
       }
-    });
+
+      // Check if the user is an admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        navigate('/admin/otp');   
+      } else {
+        navigate('/');       
+      }
+    };
+
+    handleCallback();
   }, [navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <p>Finishing login...</p>
+      <p>Finishing login…</p>
     </div>
   );
 }

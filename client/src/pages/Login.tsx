@@ -1,17 +1,38 @@
 // src/pages/Login.tsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [showResend, setShowResend] = useState(false);
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setError(null);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
+    } else {
+      alert('Confirmation email resent. Check your inbox.');
+    }
+  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setShowResend(false);
     setLoading(true);
 
     try {
@@ -24,13 +45,37 @@ export default function Login() {
           },
         });
         if (error) throw error;
-        alert('Check your email for the confirmation link!');
+        alert('Account created! Check your email for the confirmation link.');
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes('email not confirmed')) {
+            setError('Your email is not verified. Check your inbox or resend the confirmation email.');
+            setShowResend(true);
+          } else {
+            throw error;
+          }
+          return; // Stop here, don't navigate
+        }
+
+        // Sign‑in succeeded – check if user is admin
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          if (profile?.role === 'admin') {
+            navigate('/admin/otp');
+          } else {
+            navigate('/');
+          }
+        }
       }
     } catch (err: any) {
       setError(err.message);
@@ -52,14 +97,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header - simple e‑commerce style */}
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl font-bold text-teal-600">Lecommerce</h1>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-lg shadow-lg p-8">
@@ -68,8 +111,17 @@ export default function Login() {
             </h2>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                {error}
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm space-y-2">
+                <p>{error}</p>
+                {showResend && (
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    className="underline text-teal-600 hover:text-teal-800 font-medium"
+                  >
+                    Resend verification email
+                  </button>
+                )}
               </div>
             )}
 
@@ -191,7 +243,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Footer links like real e‑commerce sites */}
           <div className="mt-6 text-center text-xs text-gray-500 space-x-4">
             <a href="#" className="hover:underline">Terms of Use</a>
             <a href="#" className="hover:underline">Privacy Policy</a>

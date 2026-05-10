@@ -5,7 +5,7 @@ dotenv.config();
 
 import webhookRouter from './routes/webhook';
 import checkoutRouter from './routes/checkout';
-
+import authRoutes from './routes/auth';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -23,7 +23,7 @@ app.use(
 
 // Other API routes
 app.use('/api/create-checkout-session', checkoutRouter);
-
+app.use('/api/admin-auth', authRoutes);
 // Health check
 app.get('/api/health', (_req, res) => res.send('OK'));
 
