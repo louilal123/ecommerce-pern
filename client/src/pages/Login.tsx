@@ -58,24 +58,12 @@ export default function Login() {
           } else {
             throw error;
           }
-          return; // Stop here, don't navigate
+          return;
         }
 
-        // Sign‑in succeeded – check if user is admin
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-
-          if (profile?.role === 'admin') {
-            navigate('/admin/otp');
-          } else {
-            navigate('/');
-          }
-        }
+        // Sign‑in succeeded – flag OTP required and go to verification
+        sessionStorage.setItem('otp_required', 'true');
+        navigate('/verify');
       }
     } catch (err: any) {
       setError(err.message);
@@ -117,7 +105,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={handleResendConfirmation}
-                    className="underline text-teal-600 hover:text-teal-800 font-medium"
+                    className="underline text-teal-600 hover:text-teal-800 font-medium cursor-pointer"
                   >
                     Resend verification email
                   </button>
@@ -161,7 +149,7 @@ export default function Login() {
                 <div className="text-right">
                   <button
                     type="button"
-                    className="text-sm text-teal-600 hover:underline"
+                    className="text-sm text-teal-600 hover:underline cursor-pointer"
                     onClick={() => alert('Password reset link will be sent to your email.')}
                   >
                     Forgot password?
@@ -172,7 +160,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
               </button>
@@ -191,7 +179,7 @@ export default function Login() {
               <div className="mt-6">
                 <button
                   onClick={handleGoogleLogin}
-                  className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-md py-2 px-4 hover:bg-gray-50 transition"
+                  className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-md py-2 px-4 hover:bg-gray-50 transition cursor-pointer"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path
@@ -223,7 +211,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
-                    className="text-teal-600 font-medium hover:underline"
+                    className="text-teal-600 font-medium hover:underline cursor-pointer"
                   >
                     Create an account
                   </button>
@@ -234,7 +222,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setMode('signin')}
-                    className="text-teal-600 font-medium hover:underline"
+                    className="text-teal-600 font-medium hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>
@@ -244,9 +232,9 @@ export default function Login() {
           </div>
 
           <div className="mt-6 text-center text-xs text-gray-500 space-x-4">
-            <a href="#" className="hover:underline">Terms of Use</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
-            <a href="#" className="hover:underline">Help Center</a>
+            <a href="#" className="hover:underline cursor-pointer">Terms of Use</a>
+            <a href="#" className="hover:underline cursor-pointer">Privacy Policy</a>
+            <a href="#" className="hover:underline cursor-pointer">Help Center</a>
           </div>
         </div>
       </main>
