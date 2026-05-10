@@ -1,7 +1,10 @@
 // src/pages/Login.tsx
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import Turnstile from 'react-turnstile';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,6 +14,13 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [showResend, setShowResend] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+  const onTurnstileVerify = useCallback((token: string) => {
+    setCaptchaToken(token);
+    // Clear previous error when captcha is solved
+    setError(null);
+  }, []);
 
   const handleResendConfirmation = async () => {
     if (!email) return;
@@ -33,6 +43,13 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setShowResend(false);
+
+    // 1. Require captcha token
+    if (!captchaToken) {
+      setError('Please complete the captcha verification.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -41,6 +58,7 @@ export default function Login() {
           email,
           password,
           options: {
+            captchaToken, // ✅ Turnstile token
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
@@ -50,6 +68,9 @@ export default function Login() {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
+          options: {
+            captchaToken, // ✅ Turnstile token
+          },
         });
         if (error) {
           if (error.message.toLowerCase().includes('email not confirmed')) {
@@ -58,7 +79,7 @@ export default function Login() {
           } else {
             throw error;
           }
-          return;
+          return; // Stop here, don't navigate
         }
 
         // Sign‑in succeeded – flag OTP required and go to verification
@@ -145,6 +166,23 @@ export default function Login() {
                 />
               </div>
 
+              {/* Turnstile widget */}
+              <div className="flex justify-center">
+                <Turnstile
+                  sitekey={TURNSTILE_SITE_KEY}
+                  onVerify={onTurnstileVerify}
+                  onError={() => {
+                    setError('Captcha verification failed. Please try again.');
+                    setCaptchaToken(null);
+                  }}
+                  onExpire={() => {
+                    setCaptchaToken(null);
+                    setError('Captcha expired. Please complete again.');
+                  }}
+                  theme="light"
+                />
+              </div>
+
               {mode === 'signin' && (
                 <div className="text-right">
                   <button
@@ -159,7 +197,7 @@ export default function Login() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !captchaToken}
                 className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
