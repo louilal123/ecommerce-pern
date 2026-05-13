@@ -1,6 +1,6 @@
 // src/pages/Login.tsx
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Turnstile } from 'react-turnstile';
 
@@ -12,13 +12,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [showResend, setShowResend] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const onTurnstileVerify = useCallback((token: string) => {
     setCaptchaToken(token);
-    // Clear previous error when captcha is solved
     setError(null);
   }, []);
 
@@ -39,12 +37,11 @@ export default function Login() {
     }
   };
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setShowResend(false);
 
-    // 1. Require captcha token
     if (!captchaToken) {
       setError('Please complete the captcha verification.');
       return;
@@ -52,45 +49,27 @@ export default function Login() {
 
     setLoading(true);
 
-    try {
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            captchaToken, // ✅ Turnstile token
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-        if (error) throw error;
-        alert('Account created! Check your email for the confirmation link.');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-          options: {
-            captchaToken, // ✅ Turnstile token
-          },
-        });
-        if (error) {
-          if (error.message.toLowerCase().includes('email not confirmed')) {
-            setError('Your email is not verified. Check your inbox or resend the confirmation email.');
-            setShowResend(true);
-          } else {
-            throw error;
-          }
-          return; 
-        }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken },
+    });
 
-        // Sign‑in succeeded – flag OTP required and go to verification
-        sessionStorage.setItem('otp_required', 'true');
-        navigate('/verify');
+    setLoading(false);
+
+    if (error) {
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setError('Your email is not verified. Check your inbox or resend the confirmation email.');
+        setShowResend(true);
+      } else {
+        setError(error.message);
       }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    // Sign‑in success → OTP flow
+    sessionStorage.setItem('otp_required', 'true');
+    navigate('/verify');
   };
 
   const handleGoogleLogin = async () => {
@@ -116,7 +95,7 @@ export default function Login() {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              {mode === 'signin' ? 'Sign In' : 'Create Account'}
+              Sign In
             </h2>
 
             {error && (
@@ -134,7 +113,7 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleEmailAuth} className="space-y-4">
+            <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -166,7 +145,6 @@ export default function Login() {
                 />
               </div>
 
-              {/* Turnstile widget */}
               <div className="flex justify-center">
                 <Turnstile
                   sitekey={TURNSTILE_SITE_KEY}
@@ -183,24 +161,22 @@ export default function Login() {
                 />
               </div>
 
-              {mode === 'signin' && (
-                <div className="text-right">
-                  <button
-                    type="button"
-                    className="text-sm text-teal-600 hover:underline cursor-pointer"
-                    onClick={() => alert('Password reset link will be sent to your email.')}
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              )}
+              <div className="text-right">
+                <button
+                  type="button"
+                  className="text-sm text-teal-600 hover:underline cursor-pointer"
+                  onClick={() => alert('Password reset link will be sent to your email.')}
+                >
+                  Forgot password?
+                </button>
+              </div>
 
               <button
                 type="submit"
                 disabled={loading || !captchaToken}
                 className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                {loading ? 'Processing...' : 'Sign In'}
               </button>
             </form>
 
@@ -243,29 +219,10 @@ export default function Login() {
             </div>
 
             <p className="mt-6 text-center text-sm text-gray-600">
-              {mode === 'signin' ? (
-                <>
-                  New to lecommerce?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setMode('signup')}
-                    className="text-teal-600 font-medium hover:underline cursor-pointer"
-                  >
-                    Create an account
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setMode('signin')}
-                    className="text-teal-600 font-medium hover:underline cursor-pointer"
-                  >
-                    Sign in
-                  </button>
-                </>
-              )}
+              New to lecommerce?{' '}
+              <Link to="/signup" className="text-teal-600 font-medium hover:underline">
+                Create an account
+              </Link>
             </p>
           </div>
 
