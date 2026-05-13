@@ -1,3 +1,4 @@
+// server\src\routes\auth.ts
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
 import { Resend } from 'resend';
@@ -26,7 +27,7 @@ router.post('/send-otp', async (req: Request, res: Response) => {
     // Send via Resend
     try {
         await resend.emails.send({
-            from: 'Lecommerce Admin <admin@yourdomain.com>', // must be a verified domain
+            from: 'Lecommerce Admin <rubinlouie40@gmail.com>',
             to: email,
             subject: 'Your admin login verification code',
             text: `Your verification code is: ${code}. It expires in 5 minutes.`,
