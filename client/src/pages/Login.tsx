@@ -79,7 +79,7 @@ export default function Login() {
           } else {
             throw error;
           }
-          return; // Stop here, don't navigate
+          return; 
         }
 
         // Sign‑in succeeded – flag OTP required and go to verification

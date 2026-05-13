@@ -18,6 +18,8 @@ import Orders from './pages/admin/Orders';
 import Categories from './pages/admin/Categories';
 import VerifyOTP from './pages/VerifyOTP';
 import OTPGuard from './components/OTPGuard';
+import Signup from './pages/Signup'; 
+import SetPassword from './pages/SetPassword';
 
 function AppRoutes() {
   const { session, loading } = useAuth();
@@ -30,6 +32,9 @@ function AppRoutes() {
     <Routes>
       {/* Public auth routes */}
       <Route path="/login" element={!session ? <Login /> : <Navigate to="/" replace />} />
+      
+     <Route path="/signup" element={!session ? <Signup /> : <Navigate to="/" replace />} />
+     <Route path="/set-password" element={session ? <SetPassword /> : <Navigate to="/login" />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* OTP verification page – accessible only when logged in, not guarded by OTPGuard */}
