@@ -16,7 +16,6 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         return;
       }
 
-      // Check role
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -24,14 +23,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         .single();
 
       if (profile?.role !== 'admin') {
-        navigate('/');
-        return;
-      }
-
-      // Check OTP verification (skip if already on the OTP page in case of reload)
-      const otpVerified = sessionStorage.getItem('admin_otp_verified');
-      if (!otpVerified && window.location.pathname !== '/admin/otp') {
-        navigate('/admin/otp');
+        navigate('/');  // or show a "forbidden" page
         return;
       }
 

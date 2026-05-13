@@ -20,6 +20,7 @@ import VerifyOTP from './pages/VerifyOTP';
 import OTPGuard from './components/OTPGuard';
 import Signup from './pages/Signup'; 
 import SetPassword from './pages/SetPassword';
+import AdminGuard from './components/AdminGuard';
 
 function AppRoutes() {
   const { session, loading } = useAuth();
@@ -52,13 +53,13 @@ function AppRoutes() {
       </Route>
 
       {/* Admin routes */}
-      <Route element={<OTPGuard><AdminLayout /></OTPGuard>}>
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/products" element={<Products />} />
-        <Route path="/admin/orders" element={<Orders />} />
-        <Route path="/admin/category" element={<Categories />} />
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-      </Route>
+        <Route element={<OTPGuard><AdminGuard><AdminLayout /></AdminGuard></OTPGuard>}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/products" element={<Products />} />
+          <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/admin/categories" element={<Categories />} />   {/* corrected */}
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
     </Routes>
   );
 }
