@@ -19,7 +19,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
 import CartDropdown from '../CartDropdown';
-
+import { toast } from 'sonner'; 
 export default function Layout() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -310,7 +310,7 @@ export default function Layout() {
             {session ? (
               <button
                 onClick={() => {
-                  signOut();
+                  signOut(); toast.success('Signed out successfully');
                   closeDrawer();
                 }}
                 className="w-full mt-2 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
