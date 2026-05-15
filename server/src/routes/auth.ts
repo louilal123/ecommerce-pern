@@ -5,14 +5,17 @@ import nodemailer from 'nodemailer';
 
 const router = Router();
 
-// Nodemailer transporter (reuse it)
+// Nodemailer transporter (force IPv4)
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
-    secure: false, // true for 465, false for others
+    secure: false,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
+    },
+    connection: {
+        family: 4,   // ✅ forces IPv4 to avoid ENETUNREACH on Render
     },
 });
 
@@ -110,7 +113,7 @@ router.post('/send-otp', async (req: Request, res: Response) => {
     }
 });
 
-// 2. Verify OTP (unchanged)
+// 2. Verify OTP
 router.post('/verify-otp', async (req: Request, res: Response) => {
     const { userId, code } = req.body;
     const { data, error } = await supabaseAdmin
