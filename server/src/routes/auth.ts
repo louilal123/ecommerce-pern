@@ -5,7 +5,6 @@ import nodemailer from 'nodemailer';
 
 const router = Router();
 
-// Nodemailer transporter (force IPv4)
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
@@ -14,7 +13,7 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
-    connection: {
+    options: {
         family: 4,
     },
 } as nodemailer.TransportOptions);
