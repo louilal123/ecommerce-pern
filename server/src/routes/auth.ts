@@ -15,9 +15,9 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
     },
     connection: {
-        family: 4,   // ✅ forces IPv4 to avoid ENETUNREACH on Render
+        family: 4,
     },
-});
+} as nodemailer.TransportOptions);
 
 // 1. Send OTP
 router.post('/send-otp', async (req: Request, res: Response) => {
