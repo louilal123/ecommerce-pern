@@ -1,22 +1,10 @@
 // server/src/routes/auth.ts
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const router = Router();
-
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-    options: {
-        family: 4,
-    },
-} as nodemailer.TransportOptions);
+const resend = new Resend(process.env.RESEND_API_KEY || '');
 
 // 1. Send OTP
 router.post('/send-otp', async (req: Request, res: Response) => {
@@ -36,10 +24,10 @@ router.post('/send-otp', async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Could not save OTP' });
     }
 
-    // Send via Nodemailer
+    // Send via Resend (HTTPS, no SMTP)
     try {
-        await transporter.sendMail({
-            from: `"Lecommerce Admin" <${process.env.SMTP_USER}>`,
+        await resend.emails.send({
+            from: 'Lecommerce Admin <onboarding@resend.dev>',
             to: email,
             subject: 'Your login verification code',
             text: `Your verification code is: ${code}. It expires in 5 minutes.`,
@@ -55,14 +43,12 @@ router.post('/send-otp', async (req: Request, res: Response) => {
     <tr>
       <td align="center">
         <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-          <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #0d9488, #14b8a6); padding: 30px 20px; text-align: center;">
               <h1 style="margin:0; color:#ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">LECOMMERCE</h1>
               <p style="margin:4px 0 0; color: rgba(255,255,255,0.85); font-size: 14px;">Verification Code</p>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
             <td style="padding: 30px 24px;">
               <p style="margin:0 0 16px; font-size: 16px; color: #1f2937; line-height: 1.5;">
@@ -71,7 +57,6 @@ router.post('/send-otp', async (req: Request, res: Response) => {
               <p style="margin:0 0 24px; font-size: 14px; color: #4b5563; line-height: 1.6;">
                 Use the 6‑digit code below to complete your sign‑in. This code expires in <strong>5 minutes</strong>.
               </p>
-              <!-- Code box -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                 <tr>
                   <td align="center">
@@ -86,7 +71,6 @@ router.post('/send-otp', async (req: Request, res: Response) => {
               </p>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
             <td style="background-color: #f9fafb; padding: 16px 24px; text-align: center; border-top: 1px solid #f3f4f6;">
               <p style="margin:0; font-size: 12px; color: #9ca3af;">
@@ -107,12 +91,12 @@ router.post('/send-otp', async (req: Request, res: Response) => {
         });
         res.json({ success: true });
     } catch (err) {
-        console.error('Nodemailer error:', err);
+        console.error('Resend error:', err);
         res.status(500).json({ error: 'Failed to send email' });
     }
 });
 
-// 2. Verify OTP
+// 2. Verify OTP (unchanged)
 router.post('/verify-otp', async (req: Request, res: Response) => {
     const { userId, code } = req.body;
     const { data, error } = await supabaseAdmin
