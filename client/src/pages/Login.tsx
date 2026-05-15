@@ -38,39 +38,41 @@ export default function Login() {
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setShowResend(false);
+  e.preventDefault();
+  setError(null);
+  setShowResend(false);
 
-    if (!captchaToken) {
-      setError('Please complete the captcha verification.');
-      return;
+  if (!captchaToken) {
+    setError('Please complete the captcha verification.');
+    return;
+  }
+
+  setLoading(true);
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+    options: { captchaToken },
+  });
+
+  setLoading(false);
+  // Clear captcha token after use
+  setCaptchaToken(null);
+
+  if (error) {
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      setError('Your email is not verified. Check your inbox or resend the confirmation email.');
+      setShowResend(true);
+    } else {
+      setError(error.message);
     }
+    return;
+  }
 
-    setLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-      options: { captchaToken },
-    });
-
-    setLoading(false);
-
-    if (error) {
-      if (error.message.toLowerCase().includes('email not confirmed')) {
-        setError('Your email is not verified. Check your inbox or resend the confirmation email.');
-        setShowResend(true);
-      } else {
-        setError(error.message);
-      }
-      return;
-    }
-
-    // Sign‑in success → OTP flow
-    sessionStorage.setItem('otp_required', 'true');
-    navigate('/verify');
-  };
+  // Sign‑in success → OTP flow
+  sessionStorage.setItem('otp_required', 'true');
+  navigate('/verify');
+};
 
   const handleGoogleLogin = async () => {
     setError(null);

@@ -36,25 +36,32 @@ export default function Signup() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    // 1. Create the account (email confirmation must be off)
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        captchaToken,
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { captchaToken },
     });
 
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      alert('Account created! Check your email for the confirmation link.');
-      navigate('/login');
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
+      return;
     }
+
+    // 2. If no session, something went wrong
+    if (!data.session) {
+      setError('Account created, but you’re not signed in. Please try logging in.');
+      setLoading(false);
+      return;
+    }
+
+    // 3. OTP flow: user is logged in → set flag → go to verification
+    sessionStorage.setItem('otp_required', 'true');
+    navigate('/verify');
   };
 
+  // ── JSX (same as before) ──────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow-sm py-4">
@@ -124,7 +131,6 @@ export default function Signup() {
                 />
               </div>
 
-              {/* Turnstile widget */}
               <div className="flex justify-center">
                 <Turnstile
                   sitekey={TURNSTILE_SITE_KEY}

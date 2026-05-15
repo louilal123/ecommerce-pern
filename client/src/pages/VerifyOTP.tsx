@@ -1,5 +1,5 @@
 // src/pages/VerifyOTP.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -8,8 +8,8 @@ export default function VerifyOTP() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sent, setSent] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const sentRef = useRef(false);   // ✅ prevents duplicate OTP sends
 
   useEffect(() => {
     const sendOTP = async () => {
@@ -20,8 +20,8 @@ export default function VerifyOTP() {
       }
       setUserEmail(user.email ?? '');
 
-      if (!sent) {
-        setSent(true);
+      if (!sentRef.current) {
+        sentRef.current = true;                // ✅ mark as sent
         try {
           const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
           const res = await fetch(`${API_URL}/api/admin-auth/send-otp`, {
@@ -33,12 +33,12 @@ export default function VerifyOTP() {
           if (!res.ok) throw new Error(data.error || 'Failed to send code');
         } catch (err: any) {
           setError(err.message);
-          setSent(false); // allow retry
+          sentRef.current = false;   // ✅ allow retry only if failed
         }
       }
     };
     sendOTP();
-  }, [navigate, sent]);
+  }, [navigate]);
 
   const maskedEmail = userEmail
     ? userEmail.replace(/(.{3})(.*)(@.*)/, '$1****$3')
@@ -119,7 +119,11 @@ export default function VerifyOTP() {
         </form>
 
         <button
-          onClick={() => setSent(false)} // triggers resend
+          onClick={() => {
+            sentRef.current = false;  
+            setCode('');               
+            setError('');            
+          }}
           className="w-full mt-4 text-teal-600 text-sm hover:underline cursor-pointer"
         >
           Resend code

@@ -23,9 +23,9 @@ export default function AuthCallback() {
         .single();
 
       if (profile?.role === 'admin') {
-        navigate('/admin/otp');   
+        navigate('/admin/dashboard');   
       } else {
-        navigate('/');       
+        navigate('/');                 
       }
     };
 
