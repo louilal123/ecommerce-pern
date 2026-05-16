@@ -38,62 +38,65 @@ router.post('/send-otp', async (req: Request, res: Response) => {
         subject: 'Your login verification code',
         textContent: `Your verification code is: ${code}. It expires in 5 minutes.`,
         htmlContent: `
-                      <!DOCTYPE html>
-                      <html>
-                      <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                      </head>
-                      <body style="margin:0; padding:0; background-color:#f4f4f5; font-family: Arial, Helvetica, sans-serif;">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding: 20px 0;">
-                          <tr>
-                            <td align="center">
-                              <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                                <tr>
-                                  <td style="background: linear-gradient(135deg, #0d9488, #14b8a6); padding: 30px 20px; text-align: center;">
-                                    <h1 style="margin:0; color:#ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">LECOMMERCE</h1>
-                                    <p style="margin:4px 0 0; color: rgba(255,255,255,0.85); font-size: 14px;">Verification Code</p>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td style="padding: 30px 24px;">
-                                    <p style="margin:0 0 16px; font-size: 16px; color: #1f2937; line-height: 1.5;">
-                                      Hello,
-                                    </p>
-                                    <p style="margin:0 0 24px; font-size: 14px; color: #4b5563; line-height: 1.6;">
-                                      Use the 6‑digit code below to complete your sign‑in. This code expires in <strong>5 minutes</strong>.
-                                    </p>
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                                      <tr>
-                                        <td align="center">
-                                          <div style="display: inline-block; background-color: #f0fdfa; border: 1px dashed #0d9488; border-radius: 8px; padding: 20px 30px;">
-                                            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0d9488; font-family: 'Courier New', monospace;">${code}</span>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    </table>
-                                    <p style="margin:0 0 8px; font-size: 13px; color: #9ca3af;">
-                                      If you didn’t request this code, you can safely ignore this email.
-                                    </p>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td style="background-color: #f9fafb; padding: 16px 24px; text-align: center; border-top: 1px solid #f3f4f6;">
-                                    <p style="margin:0; font-size: 12px; color: #9ca3af;">
-                                      © ${new Date().getFullYear()} Lecommerce. All rights reserved.
-                                    </p>
-                                    <p style="margin:4px 0 0; font-size: 11px; color: #d1d5db;">
-                                      Need help? Contact support@lecommerce.com
-                                    </p>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                        </table>
-                      </body>
-                    </html>
-                `,
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f4f5; font-family: Arial, Helvetica, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding: 20px 0;">
+            <tr>
+              <td align="center">
+                <table width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                  <!-- Header with logo -->
+                  <tr>
+                    <td style="background-color:#0D9488; padding: 24px 20px; text-align: center;">
+                      <img src="https://ecommerce-pern.vercel.app/lecommercelogo.svg" alt="Lecommerce Logo" style="height:40px; display:block; margin:0 auto;">
+                    </td>
+                  </tr>
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding: 32px 24px;">
+                      <p style="margin:0 0 16px; font-size: 16px; color: #1f2937; line-height: 1.5;">
+                        Hello,
+                      </p>
+                      <p style="margin:0 0 24px; font-size: 14px; color: #4b5563; line-height: 1.6;">
+                        Use the 6‑digit code below to complete your sign‑in. This code expires in <strong>5 minutes</strong>.
+                      </p>
+                      <!-- Code box – orange accent -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                        <tr>
+                          <td align="center">
+                            <div style="display: inline-block; background-color: #FFF7ED; border: 2px solid #F97316; border-radius: 8px; padding: 20px 30px;">
+                              <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #F97316; font-family: 'Courier New', monospace;">${code}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="margin:0 0 8px; font-size: 13px; color: #9ca3af;">
+                        If you didn’t request this code, you can safely ignore this email.
+                      </p>
+                    </td>
+                  </tr>
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f9fafb; padding: 16px 24px; text-align: center; border-top: 1px solid #f3f4f6;">
+                      <p style="margin:0; font-size: 12px; color: #9ca3af;">
+                        © ${new Date().getFullYear()} Lecommerce. All rights reserved.
+                      </p>
+                      <p style="margin:4px 0 0; font-size: 11px; color: #d1d5db;">
+                        Need help? Contact support@lecommerce.com
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        `
       }),
     });
 
