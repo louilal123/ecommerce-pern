@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../hooks/useAdmin';
+import LoadingSpinner from './LoadingSpinner';   
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const isAdmin = useAdmin();
 
   if (isAdmin === null) {
-    return <div className="p-8 text-center">Checking permissions…</div>;
+    return <LoadingSpinner />;  
   }
 
   if (!isAdmin) {

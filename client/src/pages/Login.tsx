@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Turnstile } from 'react-turnstile';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -10,6 +11,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
@@ -38,41 +40,39 @@ export default function Login() {
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setShowResend(false);
+    e.preventDefault();
+    setError(null);
+    setShowResend(false);
 
-  if (!captchaToken) {
-    setError('Please complete the captcha verification.');
-    return;
-  }
-
-  setLoading(true);
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-    options: { captchaToken },
-  });
-
-  setLoading(false);
-  // Clear captcha token after use
-  setCaptchaToken(null);
-
-  if (error) {
-    if (error.message.toLowerCase().includes('email not confirmed')) {
-      setError('Your email is not verified. Check your inbox or resend the confirmation email.');
-      setShowResend(true);
-    } else {
-      setError(error.message);
+    if (!captchaToken) {
+      setError('Please complete the captcha verification.');
+      return;
     }
-    return;
-  }
 
-  // Sign‑in success → OTP flow
-  sessionStorage.setItem('otp_required', 'true');
-  navigate('/verify');
-};
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken },
+    });
+
+    setLoading(false);
+    setCaptchaToken(null);
+
+    if (error) {
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setError('Your email is not verified. Check your inbox or resend the confirmation email.');
+        setShowResend(true);
+      } else {
+        setError(error.message);
+      }
+      return;
+    }
+
+    sessionStorage.setItem('otp_required', 'true');
+    navigate('/verify');
+  };
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -89,7 +89,7 @@ export default function Login() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-teal-600">Lecommerce</h1>
+           <Link to="/" className="text-2xl font-bold text-teal-600">Lecommerce</Link>
         </div>
       </header>
 
@@ -135,16 +135,30 @@ export default function Login() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-center">

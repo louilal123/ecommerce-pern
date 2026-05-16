@@ -11,7 +11,6 @@ import {
   UserIcon,
   BellIcon,
   Bars3Icon,
-  ShoppingBagIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
   GlobeAltIcon,
@@ -19,7 +18,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
 import CartDropdown from '../CartDropdown';
-import { toast } from 'sonner'; 
+import { toast } from 'sonner';
+import logo from '../../assets/lecommercelogo.svg';
+
 export default function Layout() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -30,7 +31,6 @@ export default function Layout() {
 
   const displayName = session?.user?.email?.split('@')[0] || 'Guest';
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -121,15 +121,11 @@ export default function Layout() {
             <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-6">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2 shrink-0 group cursor-pointer">
-                <div className="relative">
-                  <ShoppingBagIcon className="h-7 w-7 text-teal-600 group-hover:text-teal-700 transition" />
-                  <span className="absolute -top-1 -right-1 bg-orange-500 w-3 h-3 rounded-full border-2 border-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-extrabold tracking-tight text-teal-600 group-hover:text-teal-700 transition leading-tight">
-                    LECOMMERCE
-                  </span>
-                </div>
+                <img
+                  src={logo}
+                  alt="Lecommerce Logo"
+                  className="h-12 w-auto"
+                />
               </Link>
 
               {/* Search Bar with Category Dropdown */}
@@ -218,8 +214,11 @@ export default function Layout() {
               </button>
 
               <Link to="/" className="flex items-center gap-1.5 cursor-pointer">
-                <ShoppingBagIcon className="h-6 w-6 text-teal-600" />
-                <span className="text-xl font-extrabold text-teal-600">lecommerce</span>
+                <img
+                  src={logo}
+                  alt="Lecommerce Logo"
+                  className="h-8 w-auto"
+                />
               </Link>
 
               <div className="flex items-center gap-2">
