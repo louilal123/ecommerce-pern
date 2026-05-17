@@ -68,7 +68,19 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Toaster position="bottom-center" richColors />
+       <Toaster
+  position="bottom-right"
+  closeButton
+  expand={true}
+  theme="light"
+  toastOptions={{
+    className:
+      "bg-white text-black border border-gray-200 shadow-2xl rounded-3xl px-5 py-4 text-base font-medium",
+    style: {
+      minWidth: "320px",
+    },
+  }}
+/>
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
