@@ -15,16 +15,32 @@ import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
   ArrowRightOnRectangleIcon,
+  MapPinIcon,
+  ChevronDownIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import { useCart } from '../../context/CartContext';
 import CartDropdown from '../CartDropdown';
 import { toast } from 'sonner';
 import logo from '../../assets/lecommercelogo.svg';
 
+const LANGUAGES = [
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'fil', label: 'Filipino', flag: '🇵🇭' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+];
+
 export default function Layout() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+
   const profileRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+
   const { count: cartItemCount } = useCart();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const { session, signOut } = useAuth();
@@ -35,6 +51,9 @@ export default function Layout() {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,12 +82,22 @@ export default function Layout() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Sticky Header Container */}
-      <header className="sticky top-0 z-40">
+    <div
+      className="min-h-screen bg-gray-50 flex flex-col"
+      style={{
+        backgroundImage: `
+          linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '40px 40px'
+      }}
+          >
+       <header className="sticky top-0 z-40">
+
         {/* Top Utility Bar */}
         <div className="bg-gray-50 text-sm">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+
             {/* Desktop links (hidden on mobile) */}
             <div className="hidden md:flex items-center gap-6">
               <Link to="/sell" className="text-gray-700 hover:text-teal-600 transition">
@@ -93,22 +122,65 @@ export default function Layout() {
                 </a>
               </div>
             </div>
+
             {/* Mobile top bar content */}
             <div className="flex md:hidden items-center gap-4 text-gray-700">
               <Link to="/sell" className="hover:text-teal-600 transition">Sell</Link>
               <Link to="/download" className="hover:text-teal-600 transition">Download</Link>
             </div>
+
             <div className="flex items-center gap-4">
+              {/* Delivery address — desktop only, static */}
+              <div className="hidden md:flex items-center gap-1 text-xs text-gray-600">
+                <MapPinIcon className="h-3.5 w-3.5 text-teal-600 shrink-0" />
+                <span>
+                  Deliver to{' '}
+                  <span className="font-semibold text-gray-800">Lahug, Cebu City, PH</span>
+                </span>
+              </div>
+
               <button className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition cursor-pointer">
                 <BellIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Notifications</span>
               </button>
+
               <Link to="/help" className="text-gray-700 hover:text-teal-600 transition cursor-pointer">
                 Help
               </Link>
-              <div className="flex items-center gap-1 text-gray-700">
-                <GlobeAltIcon className="h-4 w-4" />
-                <span className="hidden md:inline">English</span>
+
+              {/* Language dropdown — replaces the old static GlobeAltIcon + "English" text */}
+              <div className="relative" ref={langRef}>
+                <button
+                  onClick={() => setLangOpen(!langOpen)}
+                  className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition cursor-pointer"
+                >
+                  <GlobeAltIcon className="h-4 w-4" />
+                  <span className="hidden md:inline">{selectedLang.label}</span>
+                  <span className="md:hidden text-base leading-none">{selectedLang.flag}</span>
+                  <ChevronDownIcon
+                    className={`h-3 w-3 transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {langOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { setSelectedLang(lang); setLangOpen(false); }}
+                        className="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{lang.flag}</span>
+                          <span>{lang.label}</span>
+                        </span>
+                        {selectedLang.code === lang.code && (
+                          <CheckIcon className="h-4 w-4 text-teal-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -116,16 +188,14 @@ export default function Layout() {
 
         {/* Main Header */}
         <div className="bg-white">
+
           {/* Desktop / Tablet Header */}
           <div className="hidden md:block">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-6">
+
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2 shrink-0 group cursor-pointer">
-                <img
-                  src={logo}
-                  alt="Lecommerce Logo"
-                  className="h-12 w-auto"
-                />
+                <img src={logo} alt="Lecommerce Logo" className="h-12 w-auto" />
               </Link>
 
               {/* Search Bar with Category Dropdown */}
@@ -137,9 +207,7 @@ export default function Layout() {
                   >
                     <option value="all">All Departments</option>
                     {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                   <input
@@ -153,20 +221,35 @@ export default function Layout() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 shrink-0">
-                <CartDropdown />
+              <div className="flex items-center gap-3 shrink-0">
+                {/* Cart + chevron caret */}
+                <div className="flex items-center gap-0.5">
+                  <CartDropdown />
+                  <ChevronDownIcon className="h-3.5 w-3.5 text-gray-400 -ml-1.5 pointer-events-none" />
+                </div>
 
                 {session ? (
                   <div ref={profileRef} className="relative">
+                    {/* Avatar + chevron caret */}
                     <button
                       onClick={() => setProfileOpen(!profileOpen)}
-                      className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase hover:bg-teal-700 transition cursor-pointer"
+                      className="flex items-center gap-1 cursor-pointer"
+                      aria-expanded={profileOpen}
                     >
-                      {displayName.charAt(0)}
+                      <div className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase hover:bg-teal-700 transition">
+                        {displayName.charAt(0)}
+                      </div>
+                      <ChevronDownIcon
+                        className={`h-3.5 w-3.5 text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
+                      />
                     </button>
 
                     {profileOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                        <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                          <p className="text-[11px] text-gray-400 uppercase tracking-wide">Signed in as</p>
+                          <p className="text-sm font-semibold text-gray-800 truncate">{displayName}</p>
+                        </div>
                         <Link
                           to="/account"
                           onClick={() => setProfileOpen(false)}
@@ -175,12 +258,8 @@ export default function Layout() {
                           <UserIcon className="h-4 w-4 text-gray-400" />
                           Profile
                         </Link>
-
                         <button
-                          onClick={() => {
-                            setProfileOpen(false);
-                            signOut();
-                          }}
+                          onClick={() => { setProfileOpen(false); signOut(); }}
                           className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer"
                         >
                           <ArrowRightOnRectangleIcon className="h-4 w-4" />
@@ -214,20 +293,26 @@ export default function Layout() {
               </button>
 
               <Link to="/" className="flex items-center gap-1.5 cursor-pointer">
-                <img
-                  src={logo}
-                  alt="Lecommerce Logo"
-                  className="h-8 w-auto"
-                />
+                <img src={logo} alt="Lecommerce Logo" className="h-8 w-auto" />
               </Link>
 
-              <div className="flex items-center gap-2">
-                <CartDropdown />
+              <div className="flex items-center gap-1">
+                {/* Cart + chevron */}
+                <div className="flex items-center gap-0">
+                  <CartDropdown />
+                  <ChevronDownIcon className="h-3 w-3 text-gray-400 -ml-1 pointer-events-none" />
+                </div>
 
                 {session ? (
-                  <Link to="/account" className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase cursor-pointer">
-                    {displayName.charAt(0)}
-                  </Link>
+                  <div className="flex items-center gap-0.5 ml-1">
+                    <Link
+                      to="/account"
+                      className="w-8 h-8 rounded-full bg-teal-600 text-white font-medium flex items-center justify-center text-sm uppercase cursor-pointer"
+                    >
+                      {displayName.charAt(0)}
+                    </Link>
+                    <ChevronDownIcon className="h-3 w-3 text-gray-400 pointer-events-none" />
+                  </div>
                 ) : (
                   <Link
                     to="/login"
@@ -257,6 +342,15 @@ export default function Layout() {
                   <MagnifyingGlassIcon className="h-4 w-4 text-white" />
                 </button>
               </div>
+            </div>
+
+            {/* Mobile delivery address */}
+            <div className="px-4 pb-2.5 flex items-center gap-1 text-xs text-gray-500">
+              <MapPinIcon className="h-3.5 w-3.5 text-teal-600 shrink-0" />
+              <span>
+                Delivering to{' '}
+                <span className="font-semibold text-gray-700">Lahug, Cebu City, Philippines</span>
+              </span>
             </div>
           </div>
         </div>
@@ -309,7 +403,8 @@ export default function Layout() {
             {session ? (
               <button
                 onClick={() => {
-                  signOut(); toast.success('Signed out successfully');
+                  signOut();
+                  toast.success('Signed out successfully');
                   closeDrawer();
                 }}
                 className="w-full mt-2 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
