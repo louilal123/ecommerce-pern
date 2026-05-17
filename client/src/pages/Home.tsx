@@ -99,58 +99,86 @@ export default function Home() {
 
   return (
     <>
-       {/* ── Hero ── */}
-      <section className="relative rounded-2xl overflow-hidden bg-[#0D9488] min-h-[220px] md:min-h-[340px] flex items-center">
-        {/* Background pattern */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, #fff 1px, transparent 1px),
-                              radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)`,
-            backgroundSize: '48px 48px',
-          }}
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-700/60 via-transparent to-transparent" />
+{/* ── Hero ── */}
+<section className="relative overflow-hidden bg-[#0D9488] min-h-[240px] md:min-h-[380px] flex items-center rounded-sm">
 
-        <div className="relative z-10 px-7 md:px-12 py-10 md:py-14 max-w-xl">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-white/30">
-            <FireIcon className="h-3.5 w-3.5 text-orange-300" />
-            New Arrivals This Week
-          </div>
+  {/* subtle texture */}
+  <div
+    className="absolute inset-0 opacity-10"
+    style={{
+      backgroundImage:
+        "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)",
+      backgroundSize: "40px 40px",
+    }}
+  />
 
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-3">
-            Shop the<br />
-            <span className="text-teal-200">Latest Trends</span>
-          </h1>
+  {/* darker gradient */}
+  <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
 
-          <p className="text-teal-100 text-sm md:text-base mb-6 leading-relaxed">
-            Free shipping on orders over <span className="text-white font-semibold">₱2,500</span>. Delivered to Lahug, Cebu City.
-          </p>
+  {/* LEFT CONTENT */}
+  <div className="relative z-10 px-7 md:px-12 py-10 md:py-14 max-w-xl">
+    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 border border-white/20">
+      <FireIcon className="h-3.5 w-3.5 text-orange-300" />
+      New Arrivals This Week
+    </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 bg-white text-teal-700 px-5 py-2.5 rounded-full text-sm font-bold hover:bg-teal-50 transition shadow-md shadow-teal-900/20 active:scale-95"
-            >
-              Shop Now
-              <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/categories"
-              className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white border border-white/30 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-white/25 transition active:scale-95"
-            >
-              Browse Categories
-            </Link>
-          </div>
-        </div>
+    <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight tracking-tight mb-3">
+      Everything You Need.
+      <br />
+      <span className="text-teal-200">Delivered Fast.</span>
+    </h1>
 
-        {/* Decorative blob */}
-        <div className="absolute right-0 top-2 bottom-0 hidden md:flex items-center pr-12 pointer-events-none">
-          <div className="w-56 h-56 rounded-full bg-white/10 blur-3xl" />
-        </div>
-      </section>
+    <p className="text-teal-100 text-sm md:text-base mb-6 leading-relaxed max-w-md">
+      Free shipping on orders over{" "}
+      <span className="text-white font-semibold">₱2,500</span>.
+      Shop trending products across fashion, tech, and lifestyle.
+    </p>
 
+    <div className="flex flex-wrap gap-3">
+      <Link
+        to="/products"
+        className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-sm text-sm font-semibold hover:bg-gray-100 transition"
+      >
+        Shop Now
+        <ArrowRightIcon className="h-4 w-4" />
+      </Link>
+
+      <Link
+        to="/categories"
+        className="inline-flex items-center gap-2 border border-white/30 text-white px-5 py-2.5 rounded-sm text-sm font-medium hover:bg-white/10 transition"
+      >
+        Browse Categories
+      </Link>
+    </div>
+  </div>
+
+  {/* RIGHT PRODUCT COLLAGE */}
+  <div className="absolute right-0 top-0 bottom-0 hidden lg:flex items-center pr-10">
+    <div className="relative w-[450px] h-full flex items-center justify-center">
+
+      {/* Sneakers */}
+      <img
+        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000"
+        alt="Sneakers"
+        className="absolute w-64 h-64 object-cover shadow-2xl rotate-[-8deg] z-20 rounded-sm hover:scale-105 transition duration-500"
+      />
+
+      {/* Headphones */}
+      <img
+        src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000"
+        alt="Headphones"
+        className="absolute right-5 top-16 w-44 h-44 object-cover shadow-xl rotate-[10deg] z-10 rounded-sm hover:scale-105 transition duration-500"
+      />
+
+      {/* Watch */}
+      <img
+        src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000"
+        alt="Watch"
+        className="absolute left-6 bottom-10 w-40 h-40 object-cover shadow-xl rotate-[6deg] z-0 rounded-sm hover:scale-105 transition duration-500"
+      />
+    </div>
+  </div>
+</section>
       {/* Categories */}
       <section className="mb-10 mt-5">
         <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-3">
